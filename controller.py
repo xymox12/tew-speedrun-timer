@@ -567,3 +567,65 @@ class TimerController:
         self.state.reset()
         self.history.clear()
         self._pending_finalize_chapter = None
+
+    def export_splits(self) -> dict:
+        """Export splits and chapter totals as a dictionary for JSON serialization."""
+        return {
+            "version": 1,
+            "game": "The Evil Within",
+            "splits": [s.to_dict() for s in self.history.splits],
+            "chapter_totals": [ct.to_dict() for ct in self.history.chapter_totals.values()]
+        }
+
+    def import_splits(self, data: dict) -> list:
+        """
+        Import splits from a dictionary (loaded from JSON).
+
+        Returns list of display items (Split and ChapterTotal objects) for UI rendering.
+        Raises ValueError if data format is invalid.
+        """
+        if not isinstance(data, dict):
+            raise ValueError("Invalid save file format")
+
+        version = data.get("version")
+        if version != 1:
+            raise ValueError(f"Unsupported save file version: {version}")
+
+        # Clear existing data
+        self.history.clear()
+        self._pending_finalize_chapter = None
+
+        display_items = []
+        splits_by_chapter: dict[str, list[Split]] = {}
+
+        # Import splits
+        for s in data.get("splits", []):
+            split = Split(
+                chapter=s["chapter"],
+                number=s["number"],
+                duration_seconds=s["duration_seconds"],
+                subsection_name=s.get("subsection_name", "")
+            )
+            self.history.add_split(split)
+            splits_by_chapter.setdefault(split.chapter, []).append(split)
+
+        # Import chapter totals
+        chapter_totals_data = {ct["chapter"]: ct for ct in data.get("chapter_totals", [])}
+
+        # Build display items in order: splits followed by chapter total
+        for chapter in splits_by_chapter:
+            for split in splits_by_chapter[chapter]:
+                display_items.append(split)
+
+            if chapter in chapter_totals_data:
+                ct_data = chapter_totals_data[chapter]
+                chapter_total = ChapterTotal(
+                    chapter=ct_data["chapter"],
+                    total_seconds=ct_data["total_seconds"],
+                    split_count=ct_data["split_count"]
+                )
+                self.history.chapter_totals[chapter] = chapter_total
+                self.history.finalized_chapters.add(chapter)
+                display_items.append(chapter_total)
+
+        return display_items

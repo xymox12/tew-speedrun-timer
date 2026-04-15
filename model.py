@@ -2,7 +2,7 @@
 # model.py
 """Data models for the timer application."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Optional, Protocol
 
 
@@ -63,6 +63,10 @@ class Split:
         """Format split time."""
         return format_time(self.duration_seconds, include_hours=False)
 
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization."""
+        return asdict(self)
+
 
 @dataclass
 class ChapterTotal:
@@ -80,6 +84,10 @@ class ChapterTotal:
     def formatted_time(self) -> str:
         """Format total time."""
         return format_time(self.total_seconds, include_hours=False)
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization."""
+        return asdict(self)
 
 
 @dataclass

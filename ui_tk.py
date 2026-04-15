@@ -1,8 +1,9 @@
 # ui_tk.py
 """Tkinter-based UI for the timer application."""
 
+import json
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog, messagebox
 from typing import Optional
 
 from config import (
@@ -193,6 +194,9 @@ class TimerWindow:
         menu.add_command(label="Copy All", command=self._copy_all_splits)
         menu.add_command(label="Copy Selected", command=self._copy_selected_split)
         menu.add_separator()
+        menu.add_command(label="Save Splits...", command=self._save_splits)
+        menu.add_command(label="Load Splits...", command=self._load_splits)
+        menu.add_separator()
         menu.add_command(label="Reset Splits", command=self._reset_splits)
 
         try:
@@ -237,6 +241,63 @@ class TimerWindow:
         """Reset all splits."""
         self.controller.reset_splits()
         self.split_tree.delete(*self.split_tree.get_children(""))
+
+    def _save_splits(self):
+        """Save splits to a JSON file."""
+        data = self.controller.export_splits()
+
+        if not data.get("splits"):
+            messagebox.showwarning("Save Splits", "No splits to save.")
+            return
+
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            title="Save Splits"
+        )
+
+        if not filepath:
+            return
+
+        try:
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except OSError as e:
+            messagebox.showerror("Save Error", f"Failed to save file:\n{e}")
+
+    def _load_splits(self):
+        """Load splits from a JSON file."""
+        filepath = filedialog.askopenfilename(
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            title="Load Splits"
+        )
+
+        if not filepath:
+            return
+
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError) as e:
+            messagebox.showerror("Load Error", f"Failed to read file:\n{e}")
+            return
+
+        try:
+            display_items = self.controller.import_splits(data)
+        except (ValueError, KeyError, TypeError) as e:
+            messagebox.showerror("Load Error", f"Invalid save file format:\n{e}")
+            return
+
+        # Clear and repopulate the treeview
+        self.split_tree.delete(*self.split_tree.get_children(""))
+
+        for item in display_items:
+            is_chapter_total = hasattr(item, "split_count")
+            self._add_entry_to_list(
+                item.label,
+                item.formatted_time,
+                add_blank_after=is_chapter_total
+            )
 
     # =========================================================================
     # Main Loop
