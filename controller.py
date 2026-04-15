@@ -277,24 +277,10 @@ class TimerController:
         if snap.chapter is not None and igt >= 0:
             debug_print(f"[ATTACH] Starting run at IGT={igt}, Chapter={snap.chapter}")
 
-            # Determine starting segment time:
-            # - New game or chapter quickload (very low IGT): Start from 0 so segment matches IGT
-            # - Mid-run attach (high IGT): Use current IGT so segment shows 0 on attach
-            if igt <= 5:
-                # Low IGT - treat as chapter start (force segment to 0)
-                # This handles both new games (IGT=0) and chapter quickloads (IGT=1)
-                debug_print(f"[ATTACH] Low IGT detected, forcing segment_start_igt=0")
-                self.state.segment_start_igt = 0
-            else:
-                # High IGT - mid-run attach
-                debug_print(f"[ATTACH] Mid-run attach, setting segment_start_igt={igt}")
-                self.state.segment_start_igt = igt
-
+            # Always use current IGT as segment start. This ensures igt == segment_start_igt
+            # on attach, so no split fires until the player moves to a new checkpoint.
+            self.state.segment_start_igt = igt
             self.state.run_active = True
-            # Do NOT pre-seed seen_nonblank_b_this_chapter or last_subsection_b here.
-            # Let _detect_split handle the first subsection_b naturally - since
-            # igt == segment_start_igt on attach, no split will fire until the
-            # player actually moves to a new checkpoint.
 
     def _check_first_subsection_marker(self, snap: GameSnapshot):
         """Check if we've hit a first subsection marker (triggers chapter finalization)."""

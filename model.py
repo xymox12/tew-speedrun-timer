@@ -1,3 +1,4 @@
+
 # model.py
 """Data models for the timer application."""
 
