@@ -12,7 +12,7 @@ python main.py  # Requires The Evil Within running
 ## Architecture
 
 ```
-main.py -> TimerWindow (UI) -> TimerController -> MemoryReader -> EvilWithin.exe
+EvilWithin.exe -> MemoryReader -> TimerController -> TimerWindow (UI)
 ```
 
 The timer polls game memory every 200ms, detects state changes, and triggers splits automatically.
