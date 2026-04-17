@@ -1,6 +1,7 @@
-# The Evil Within IGT Speedrun Timer
+# The Evil Within IGT Speedrun Timer [EPIC Release Only]
 
 A speedrun timer that reads in-game time (IGT) directly from process memory and auto-splits based on checkpoint changes.
+This is for the EPIC release of the game. This will not work with the Steam version.
 
 ## Quick Start
 
