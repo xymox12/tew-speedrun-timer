@@ -27,14 +27,15 @@ The application reads four values from game memory. All addresses are relative t
 
 **Pointer Chain:**
 ```
-Base + 0x02258E00 -> +0x68 -> +0x28 -> +0x8D8C = IGT value (int32)
+Base + 0x02258E00 -> +0x68 -> +0x28 -> +0x00 = Player entity in idGameLocal
+                                    -> +0x8D8C = IGT value (int32)
 ```
 
-This is a multi-level pointer. The code follows each dereference:
-1. Read pointer at `base + BASE_OFFSET`
+This is a multi-level pointer that navigates to the player entity within the game's `idGameLocal` entity list:
+1. Read pointer at `base + BASE_OFFSET` (0x02258E00)
 2. Add `0x68`, read pointer
-3. Add `0x28`, read pointer
-4. Add `0x8D8C` to get final address containing IGT
+3. Add `0x28`, read pointer (points to player entity)
+4. Add `0x8D8C` to get final address containing IGT within the player entity
 
 **Implementation:** `memory_reader.py:53-59` (`resolve_pointer_chain`)
 
