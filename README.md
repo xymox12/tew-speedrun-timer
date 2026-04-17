@@ -106,6 +106,18 @@ Key values in `config.py`:
 | `BASE_OFFSET` | `0x02258E00` | IGT pointer chain start |
 | `POINTER_OFFSETS` | `(0x68, 0x28, 0x8D8C)` | IGT chain offsets |
 
+## UI Features
+
+Right-click the split list to access the context menu:
+
+- **Copy All** - Copy all splits to clipboard
+- **Copy Selected** - Copy the selected split to clipboard
+- **Save Splits...** - Export splits and chapter totals to a JSON file
+- **Load Splits...** - Import splits from a previously saved JSON file
+- **Reset Splits** - Clear the split list and reset the timer state
+
+**Note:** When loading splits, the timer must still be at chapter boundaries or the current chapter total will only count from where you rejoin the game.
+
 ## Testing
 
 ```bash
