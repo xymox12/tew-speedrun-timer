@@ -9,6 +9,8 @@ pip install -r requirements.txt
 python main.py  # Requires The Evil Within running
 ```
 
+![Timer Application](assets/screenshot.png)
+
 ## Architecture
 
 ```
